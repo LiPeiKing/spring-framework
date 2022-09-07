@@ -71,14 +71,22 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	 * Create a new ApplicationContextAwareProcessor for the given context.
 	 */
 	public ApplicationContextAwareProcessor(ConfigurableApplicationContext applicationContext) {
+		// 创建Processort的时候，完成applicationContext的赋值
 		this.applicationContext = applicationContext;
+		// 创建默认的值解析器，用来解析classpath中配置的占位符变量的值
 		this.embeddedValueResolver = new EmbeddedValueResolver(applicationContext.getBeanFactory());
 	}
 
 
 	@Override
 	@Nullable
+	// 该方法在创建Bean的过程中，在bean初始化之前调用
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		/**
+		 * applicationContext 是 Environment、ResourceLoader、
+		 * ApplicationEventPublisher、MessageSource 等的子类，这些类的aware接口的调用，都可以
+		 * 通过 applicationContext 参数进行
+		 */
 		if (!(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
 				bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
 				bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware ||
@@ -99,17 +107,25 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			}, acc);
 		}
 		else {
+			// 运行方法
 			invokeAwareInterfaces(bean);
 		}
 
 		return bean;
 	}
 
+	/**
+	 * 调用 Aware 接口的方法
+	 * 除了EmbeddedValueResolverAware外，其余的传入参数都是 this.applicationContext
+	 */
 	private void invokeAwareInterfaces(Object bean) {
+		// 调用 EnvironmentAware#setEnvironment 方法
 		if (bean instanceof EnvironmentAware) {
 			((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 		}
 		if (bean instanceof EmbeddedValueResolverAware) {
+			// 注意embeddedValueResolver的获取操作如下：
+			// new EmbeddedValueResolver(applicationContext.getBeanFactory());
 			((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
 		if (bean instanceof ResourceLoaderAware) {
@@ -124,6 +140,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		if (bean instanceof ApplicationStartupAware) {
 			((ApplicationStartupAware) bean).setApplicationStartup(this.applicationContext.getApplicationStartup());
 		}
+		// 装配 实现了ApplicationContextAware的类的 applicationContext
 		if (bean instanceof ApplicationContextAware) {
 			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
 		}

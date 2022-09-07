@@ -61,13 +61,21 @@ import java.lang.annotation.Target;
  * @see Configuration
  * @see org.springframework.stereotype.Component
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.PARAMETER, ElementType.FIELD})
+@Target({ElementType.TYPE,	// 标注在类上
+		ElementType.METHOD,	// 标注在方法上
+		ElementType.CONSTRUCTOR,	// 标注在构造函数上
+		ElementType.PARAMETER,	// 标注在参数上
+		ElementType.FIELD})	// 标注在成员变量上
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Lazy {
 
 	/**
 	 * Whether lazy initialization should occur.
+	 */
+	/**
+	 * 标记是否为懒加载，默认值为true。
+	 * 所以可以直接标注注解，不指定value属性
 	 */
 	boolean value() default true;
 

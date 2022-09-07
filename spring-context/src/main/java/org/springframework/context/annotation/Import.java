@@ -59,6 +59,7 @@ public @interface Import {
 	 * {@link Configuration @Configuration}, {@link ImportSelector},
 	 * {@link ImportBeanDefinitionRegistrar}, or regular component classes to import.
 	 */
+	// 待注入的组件对应的class类
 	Class<?>[] value();
 
 }

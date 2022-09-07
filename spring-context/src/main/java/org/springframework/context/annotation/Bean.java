@@ -225,6 +225,9 @@ public @interface Bean {
 	 * @since 4.3.3
 	 * @see #name
 	 */
+	// 用来指定bean的名称，当声明bean的名称时没有指定属性名，将会使用该属性
+	// 例如：@Bean("myCustomer")
+	// AliasFor表示的是name和value互为别名，指定name或者value都可以
 	@AliasFor("name")
 	String[] value() default {};
 
@@ -236,6 +239,7 @@ public @interface Bean {
 	 * attribute if no other attributes are declared.
 	 * @see #value
 	 */
+	// 用来表示bean的名称，可以在@Bean中显示使用该属性指定bean的名称
 	@AliasFor("value")
 	String[] name() default {};
 
@@ -251,6 +255,8 @@ public @interface Bean {
 	 * @deprecated as of 5.1, since {@code @Bean} factory method argument resolution and
 	 * {@code @Autowired} processing supersede name/type-based bean property injection
 	 */
+	// bean的自动注入模型，包括三种：不自动注入，按类型注入，按名称注入
+	// 逐步废弃掉，不建议使用的属性
 	@Deprecated
 	Autowire autowire() default Autowire.NO;
 
@@ -260,6 +266,9 @@ public @interface Bean {
 	 * that are not meant to get in the way of beans of the same type in other places.
 	 * @since 5.1
 	 */
+	// 表示是否使用候选bean，使用了autowire指定了自动注入模式的bean，在spring
+	//  实例化bean的时候就会去查找这些标记了自动注入的bean，这些bean就是候选bean
+	//  此处可以设置是否在初始化时使用这些候选bean，默认是使用
 	boolean autowireCandidate() default true;
 
 	/**
@@ -270,6 +279,8 @@ public @interface Bean {
 	 * @see org.springframework.beans.factory.InitializingBean
 	 * @see org.springframework.context.ConfigurableApplicationContext#refresh()
 	 */
+	// 指定bean的初始化方法，为某一个bean中的一个方法名，不受修饰符的限制，可以为private或者final修饰的
+	//  在bean实例化及属性赋值完成之后会执行
 	String initMethod() default "";
 
 	/**
@@ -299,6 +310,8 @@ public @interface Bean {
 	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
+	// 指定bean的自动销毁方法，在bean的生命周期完成之后【即：调用容器的close方法时】，同样不受修饰符的限制
+	//  会自动执行.
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;
 
 }

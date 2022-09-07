@@ -65,6 +65,7 @@ public @interface Conditional {
 	 * All {@link Condition} classes that must {@linkplain Condition#matches match}
 	 * in order for the component to be registered.
 	 */
+	// 指定注入bean时使用的条件类，这个类需要自定义，并且实现Condition接口
 	Class<? extends Condition>[] value();
 
 }

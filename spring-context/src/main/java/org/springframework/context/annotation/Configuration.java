@@ -436,6 +436,8 @@ public @interface Configuration {
 	 * @return the explicit component name, if any (or empty String otherwise)
 	 * @see AnnotationBeanNameGenerator
 	 */
+	// 该value属性一般不需要指定，表示当前注解继承过来的注解，使用该注解标注在
+	//   类上之后，该注解就有了@Component注解的作用，将标注的类作为一个组件
 	@AliasFor(annotation = Component.class)
 	String value() default "";
 

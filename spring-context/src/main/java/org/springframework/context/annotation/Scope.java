@@ -67,6 +67,9 @@ public @interface Scope {
 	 * Alias for {@link #scopeName}.
 	 * @see #scopeName
 	 */
+	/**
+	 * bean的作用域，和scopeName互为别名
+	 */
 	@AliasFor("scopeName")
 	String value() default "";
 
@@ -81,6 +84,14 @@ public @interface Scope {
 	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_SESSION
 	 * @see #value
 	 */
+	/**
+	 * bean的作用域，和value互为别名
+	 * Spring的Bean作用域有四种：
+	 * SCOPE_PROTOTYPE: 多实例，每次获取，都会生成一个新实例
+	 * SCOPE_SINGLETON: 单实例，多次获取到的都是一个实例
+	 * SCOPE_REQUEST: web中，每次请求会生成一个实例
+	 * SCOPE_SESSION: web中，同一个会话中多次获取到的是同一个实例.
+	 */
 	@AliasFor("value")
 	String scopeName() default "";
 
@@ -93,6 +104,9 @@ public @interface Scope {
 	 * <p>Analogous to {@code <aop:scoped-proxy/>} support in Spring XML.
 	 * @see ScopedProxyMode
 	 */
+	// 用于指定Spring在某些作用域生成代理bean时，创建代理的方式，默认是不创建代理
+	// a.INTERFACES表示使用JDK生成代理，需要代理类去实现接口
+	// b.TARGET_CLASS表示使用CGLIB生成代理
 	ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
 
 }

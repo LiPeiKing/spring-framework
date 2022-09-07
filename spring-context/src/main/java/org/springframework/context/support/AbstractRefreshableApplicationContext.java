@@ -71,6 +71,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	private Boolean allowCircularReferences;
 
 	/** Bean factory for this context. */
+	// 这就是持有的 beanFactory 对象
 	@Nullable
 	private volatile DefaultListableBeanFactory beanFactory;
 
@@ -119,14 +120,18 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		// 判断当前ApplicationContext是否存在BeanFactory，如果存在的话就销毁所有 Bean，关闭 BeanFactory
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
 		}
 		try {
+			// 初始化DefaultListableBeanFactory，看下面的创建方法
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
+			// 设置 BeanFactory 的两个配置属性：是否允许 Bean 覆盖、是否允许循环引用
 			customizeBeanFactory(beanFactory);
+			// 加载 Bean 到 BeanFactory 中
 			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}
@@ -194,6 +199,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
 	 */
 	protected DefaultListableBeanFactory createBeanFactory() {
+		// 指定父beanFactory
 		return new DefaultListableBeanFactory(getInternalParentBeanFactory());
 	}
 

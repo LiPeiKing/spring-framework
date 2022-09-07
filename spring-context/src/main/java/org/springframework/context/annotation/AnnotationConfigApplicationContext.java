@@ -100,8 +100,16 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param basePackages the packages to scan for component classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
+		// 1. 调用无参构造函数，会先调用父类GenericApplicationContext的构造函数
+		// 2. 父类的构造函数里面就是初始化DefaultListableBeanFactory，并且赋值给beanFactory
+		// 3. 本类的构造函数里面，初始化了一个读取器：AnnotatedBeanDefinitionReader read，
+		//    一个扫描器ClassPathBeanDefinitionScanner scanner
+		// 4. 这个scanner，就是下面 scan(basePackages) 调用的对象
 		this();
+		//对传入的包进行扫描，扫描完成后，会得到一个 BeanDefinition 的集合
 		scan(basePackages);
+		//启动spring，在这里完成spring容器的初始化操作，
+		//包括bean的实例化、属性注入，将bean保存到spring容器中等
 		refresh();
 	}
 

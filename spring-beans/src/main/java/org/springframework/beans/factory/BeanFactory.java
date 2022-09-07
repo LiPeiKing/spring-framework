@@ -125,6 +125,9 @@ public interface BeanFactory {
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
 	 */
+	/**
+	 * factoryBean使用
+	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
 
@@ -139,6 +142,9 @@ public interface BeanFactory {
 	 * @return an instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
 	 * @throws BeansException if the bean could not be obtained
+	 */
+	/**
+	 * 根据名称获取bean
 	 */
 	Object getBean(String name) throws BeansException;
 
@@ -157,6 +163,9 @@ public interface BeanFactory {
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
 	 */
+	/**
+	 * 根据名称获取bean
+	 */
 	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
 
 	/**
@@ -173,6 +182,9 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 * @since 2.5
 	 */
+	/**
+	 * 根据名称获取bean
+	 */
 	Object getBean(String name, Object... args) throws BeansException;
 
 	/**
@@ -188,6 +200,9 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 * @since 3.0
 	 * @see ListableBeanFactory
+	 */
+	/**
+	 * 根据类型获取bean
 	 */
 	<T> T getBean(Class<T> requiredType) throws BeansException;
 
@@ -209,6 +224,9 @@ public interface BeanFactory {
 	 * @throws BeansException if the bean could not be created
 	 * @since 4.1
 	 */
+	/**
+	 * 根据类型获取bean
+	 */
 	<T> T getBean(Class<T> requiredType, Object... args) throws BeansException;
 
 	/**
@@ -219,6 +237,9 @@ public interface BeanFactory {
 	 * @return a corresponding provider handle
 	 * @since 5.1
 	 * @see #getBeanProvider(ResolvableType)
+	 */
+	/**
+	 * 获取BeanProvider
 	 */
 	<T> ObjectProvider<T> getBeanProvider(Class<T> requiredType);
 
@@ -243,6 +264,9 @@ public interface BeanFactory {
 	 * @see ObjectProvider#stream()
 	 * @see ObjectProvider#orderedStream()
 	 */
+	/**
+	 * 获取BeanProvider
+	 */
 	<T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType);
 
 	/**
@@ -260,6 +284,9 @@ public interface BeanFactory {
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is present
 	 */
+	/**
+	 * 是否包含bean
+	 */
 	boolean containsBean(String name);
 
 	/**
@@ -276,6 +303,9 @@ public interface BeanFactory {
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @see #getBean
 	 * @see #isPrototype
+	 */
+	/**
+	 * 是否为单例bean
 	 */
 	boolean isSingleton(String name) throws NoSuchBeanDefinitionException;
 
@@ -295,6 +325,9 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #isSingleton
 	 */
+	/**
+	 * 是否为原型bean
+	 */
 	boolean isPrototype(String name) throws NoSuchBeanDefinitionException;
 
 	/**
@@ -311,6 +344,9 @@ public interface BeanFactory {
 	 * @since 4.2
 	 * @see #getBean
 	 * @see #getType
+	 */
+	/**
+	 * 判断类型是否匹配
 	 */
 	boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException;
 
@@ -329,6 +365,9 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #getType
 	 */
+	/**
+	 * 判断类型是否匹配
+	 */
 	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
 
 	/**
@@ -345,6 +384,9 @@ public interface BeanFactory {
 	 * @since 1.1.2
 	 * @see #getBean
 	 * @see #isTypeMatch
+	 */
+	/**
+	 * 根据名称获取bean的类型
 	 */
 	@Nullable
 	Class<?> getType(String name) throws NoSuchBeanDefinitionException;
@@ -367,6 +409,9 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #isTypeMatch
 	 */
+	/**
+	 * 根据名称获取bean的类型
+	 */
 	@Nullable
 	Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException;
 
@@ -380,6 +425,9 @@ public interface BeanFactory {
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
 	 * @see #getBean
+	 */
+	/**
+	 * 根据bean名称获取bean的别名
 	 */
 	String[] getAliases(String name);
 
