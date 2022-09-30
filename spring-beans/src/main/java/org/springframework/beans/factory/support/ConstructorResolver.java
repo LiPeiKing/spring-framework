@@ -430,6 +430,7 @@ class ConstructorResolver {
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
+		// 处理 factoryMethod 的参数
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}

@@ -125,14 +125,18 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
+		// 遍历处理传入的 configurationModel
 		for (ConfigurationClass configClass : configurationModel) {
 			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
 	}
 
 	/**
-	 * Read a particular {@link ConfigurationClass}, registering bean definitions
-	 * for the class itself and all of its {@link Bean} methods.
+	 * 这个方法会加载各种 ConfigurationClass 引入的 BeanDefinition
+	 * 1. @Import 引入的类
+	 * 2. 配置类中的 @Bean 方法
+	 * 3. @ImportResource 引入的资源
+	 * 4. @Import 引入的 ImportBeanDefinitionRegistrar
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(
 			ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
@@ -146,14 +150,18 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 处理 @Import 引入的配置类
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+		// 处理 @Bean 方法
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
+		// 处理 @ImportResource 引入的资源
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// 处理 @Import 引入的 ImportBeanDefinitionRegistrar
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
@@ -184,6 +192,12 @@ class ConfigurationClassBeanDefinitionReader {
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	@SuppressWarnings("deprecation")  // for RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE
+	/**
+	 * 处理 @Bean 方法
+	 * 1. 创建BeanDefinition，beanMethod 使用的是 ConfigurationClassBeanDefinition
+	 * 2. 处理 @Bean 的各种属性，设置到 BeanDefinition 中
+	 * 3. 将 BeanDefinition 注册到 beanFactory 中
+	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
@@ -220,15 +234,18 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 2. 处理 @Bean 的各种属性
 		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata, beanName);
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 
 		if (metadata.isStatic()) {
 			// static @Bean method
+			// 静态 @Bean 方法
 			if (configClass.getMetadata() instanceof StandardAnnotationMetadata) {
 				beanDef.setBeanClass(((StandardAnnotationMetadata) configClass.getMetadata()).getIntrospectedClass());
 			}
 			else {
+				// 普通的 @Bean 方法
 				beanDef.setBeanClassName(configClass.getMetadata().getClassName());
 			}
 			beanDef.setUniqueFactoryMethodName(methodName);
@@ -292,6 +309,7 @@ class ConfigurationClassBeanDefinitionReader {
 			logger.trace(String.format("Registering bean definition for @Bean method %s.%s()",
 					configClass.getMetadata().getClassName(), beanName));
 		}
+		// 3. 将BeanDefinition注册到beanFactory中
 		this.registry.registerBeanDefinition(beanName, beanDefToRegister);
 	}
 

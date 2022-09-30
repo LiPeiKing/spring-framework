@@ -196,6 +196,7 @@ class ConfigurationClassParser {
 	protected final void parse(@Nullable String className, String beanName) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
+		// 又调回 processConfigurationClass(...) 方法了
 		processConfigurationClass(new ConfigurationClass(reader, beanName), DEFAULT_EXCLUSION_FILTER);
 	}
 
@@ -267,12 +268,14 @@ class ConfigurationClassParser {
 			ConfigurationClass configClass, SourceClass sourceClass, Predicate<String> filter)
 			throws IOException {
 
+		// 1. 如果是 @Component 注解，递归处理内部类
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
 			processMemberClasses(configClass, sourceClass, filter);
 		}
 
 		// Process any @PropertySource annotations
+		// 2. 处理@PropertySource注解，本文不关注
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
@@ -286,21 +289,32 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		// 3. 处理 @ComponentScan/@ComponentScans 注解
+		// 3.1 获取配置类上的 @ComponentScan/@ComponentScans 注解
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
-		if (!componentScans.isEmpty() &&
-				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+		// 如果没有打上ComponentScan，或者被@Condition条件跳过，就不再进入这个if
+		if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			// 循环处理componentScans，也就是配置类上的所有@ComponentScan注解的内容
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				// 3.2 componentScanParser.parse(...)：具体解析componentScan的操作
+				// componentScan就是@ComponentScan上的具体内容，
+				// sourceClass.getMetadata().getClassName()就是配置类的名称
+				// 真正解析的地方
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
+				// 3.3 循环得到的 BeanDefinition，如果对应的类是配置类，递归调用parse(...)方法
+				// componentScan引入的类可能有被@Bean标记的方法，或者有@ComponentScan注解
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					// 判断BeanDefinition对应的类是否为配置类
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+						// 对得到的类，调用parse(...)方法，再次进行解析
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}
@@ -308,9 +322,11 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @Import annotations
+		// 4. 处理@Import注解，
 		processImports(configClass, sourceClass, getImports(sourceClass), filter, true);
 
 		// Process any @ImportResource annotations
+		// 5. 处理@ImportResource注解
 		AnnotationAttributes importResource =
 				AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
 		if (importResource != null) {
@@ -323,6 +339,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process individual @Bean methods
+		// 6. 处理@Bean的注解
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
@@ -332,6 +349,7 @@ class ConfigurationClassParser {
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
+		// 7. 返回配置类的父类，会在 processConfigurationClass(...) 方法的下一次循环时解析
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (superclass != null && !superclass.startsWith("java") &&

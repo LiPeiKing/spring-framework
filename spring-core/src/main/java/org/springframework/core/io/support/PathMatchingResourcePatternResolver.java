@@ -335,9 +335,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	protected Set<Resource> doFindAllClassPathResources(String path) throws IOException {
 		Set<Resource> result = new LinkedHashSet<>(16);
 		ClassLoader cl = getClassLoader();
+		// path对应的url
 		Enumeration<URL> resourceUrls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
 		while (resourceUrls.hasMoreElements()) {
 			URL url = resourceUrls.nextElement();
+			// 将url转换为Resource，并添加到结果中
 			result.add(convertClassLoaderURL(url));
 		}
 		if (!StringUtils.hasLength(path)) {
@@ -357,6 +359,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.core.io.Resource
 	 */
 	protected Resource convertClassLoaderURL(URL url) {
+		// 将url转换为Resource
 		return new UrlResource(url);
 	}
 
@@ -492,8 +495,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see org.springframework.util.PathMatcher
 	 */
 	protected Resource[] findPathMatchingResources(String locationPattern) throws IOException {
+		// 传入的 locationPattern 是 classpath*:org/springframework/learn/demo01/**/*.class
+		// rootDirPath 是 classpath*:org/springframework/learn/demo01/
 		String rootDirPath = determineRootDir(locationPattern);
+
+		// subPattern 是 **/*.class
 		String subPattern = locationPattern.substring(rootDirPath.length());
+
+		// 这里返回的 Resource 是 rootDirPath 的绝对路径(用url表示)
+		// URL [file:/xxx/spring-learn/build/classes/java/main/org/springframework/learn/demo01/]
 		Resource[] rootDirResources = getResources(rootDirPath);
 		Set<Resource> result = new LinkedHashSet<>(16);
 		for (Resource rootDirResource : rootDirResources) {
@@ -506,12 +516,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				}
 				rootDirResource = new UrlResource(rootDirUrl);
 			}
+			// 处理 vfs 资源查找
 			if (rootDirUrl.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
 				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirUrl, subPattern, getPathMatcher()));
 			}
+			// 处理jar包文件查找
 			else if (ResourceUtils.isJarURL(rootDirUrl) || isJarResource(rootDirResource)) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
 			}
+			// 处理文件路径下的文件查找
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
 			}

@@ -416,8 +416,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			//组装扫描路径（组装完成后是这种格式：classpath*:org/springframework/learn/demo01/**/*.class）
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			//根据路径获取资源对象，即扫描出该路径下的的所有class文件，得到 Resource
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -426,7 +428,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					logger.trace("Scanning " + resource);
 				}
 				try {
+					//根据资源对象获取资源对象的MetadataReader
 					MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+					// 这里做了两件事：
+					// 1. 是否需要初始化为spring bean，即是否有 @Component、@Service等注解
+					// 2. 查看配置类是否有@Conditional一系列的注解，然后是否满足注册Bean的条件
 					if (isCandidateComponent(metadataReader)) {
 						ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 						sbd.setSource(resource);
@@ -491,7 +497,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			}
 		}
 		for (TypeFilter tf : this.includeFilters) {
+			// 这里判断是否需要托管到spring容器
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
+				// 判断是否有@Conditional一系列的注解
 				return isConditionMatch(metadataReader);
 			}
 		}

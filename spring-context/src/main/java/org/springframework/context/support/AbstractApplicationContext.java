@@ -229,6 +229,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 	/** Statically specified listeners. */
+	/** 这里就是用来存放监听器的 */
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
 	/** Local listeners registered before refresh. */
@@ -525,6 +526,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.beanFactoryPostProcessors;
 	}
 
+	/**
+	 * 添加监听器
+	 */
 	@Override
 	public void addApplicationListener(ApplicationListener<?> listener) {
 		Assert.notNull(listener, "ApplicationListener must not be null");
@@ -537,6 +541,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Return the list of statically specified ApplicationListeners.
 	 */
+	/** 返回当前所有的监听器 */
 	public Collection<ApplicationListener<?>> getApplicationListeners() {
 		return this.applicationListeners;
 	}
@@ -656,10 +661,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		// 初始化加载配置文件方法，并没有具体实现，一个留给用户的扩展点
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		// 检查环境变量
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -809,14 +816,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Initialize the MessageSource.
 	 * Use parent's if none defined in this context.
 	 */
+	/**
+	 * 初始化 MessageSource
+	 */
 	protected void initMessageSource() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		// 如果beanFactory中存在MessageSource，设置其 ParentMessageSource
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
 			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
 				HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
 				if (hms.getParentMessageSource() == null) {
+					// 设置ParentMessageSource
 					// Only set parent context as parent MessageSource if no parent MessageSource
 					// registered already.
 					hms.setParentMessageSource(getInternalParentMessageSource());
@@ -826,11 +838,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.trace("Using MessageSource [" + this.messageSource + "]");
 			}
 		}
+		// 如果beanFactory中不存在MessageSource，就 创建-设置-注册
 		else {
 			// Use empty MessageSource to be able to accept getMessage calls.
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
+			// 设置ParentMessageSource
 			beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No '" + MESSAGE_SOURCE_BEAN_NAME + "' bean, using [" + this.messageSource + "]");
@@ -905,12 +919,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
+		// 先添加手动set的一些监听器
+		// getApplicationListeners() 获取的监听器基本是通过调用 addApplicationListener(...) 添加的
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
 
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
+		// 获取取到监听器的名称，设置到广播器
+		// 此时获取的监听器是从 beanFactory 中获取的，即是spring通过包扫描得到的
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
 		for (String listenerBeanName : listenerBeanNames) {
 			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
@@ -918,9 +936,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish early application events now that we finally have a multicaster...
 		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
+		// 如果存在早期应用事件，广播
 		this.earlyApplicationEvents = null;
 		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {
 			for (ApplicationEvent earlyEvent : earlyEventsToProcess) {
+				//  广播早期事件
 				getApplicationEventMulticaster().multicastEvent(earlyEvent);
 			}
 		}
@@ -969,18 +989,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@SuppressWarnings("deprecation")
 	protected void finishRefresh() {
 		// Clear context-level resource caches (such as ASM metadata from scanning).
+		// 看名字就知道了，清理初始化过程中一系列操作使用到的资源缓存
 		clearResourceCaches();
 
 		// Initialize lifecycle processor for this context.
+		// 初始化LifecycleProcessor
 		initLifecycleProcessor();
 
 		// Propagate refresh to lifecycle processor first.
+		// 这个方法的内部实现是启动所有实现了Lifecycle接口的bean
 		getLifecycleProcessor().onRefresh();
 
 		// Publish the final event.
+		// 发布ContextRefreshedEvent事件
 		publishEvent(new ContextRefreshedEvent(this));
 
 		// Participate in LiveBeansView MBean, if active.
+		// 检查spring.liveBeansView.mbeanDomain是否存在，有就会创建一个MBeanServer
 		if (!NativeDetector.inNativeImage()) {
 			LiveBeansView.registerApplicationContext(this);
 		}
@@ -1449,6 +1474,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * AbstractApplicationContext too; else, return the parent context itself.
 	 */
 	@Nullable
+	/**
+	 * 返回父容器的 messageSource
+	 */
 	protected MessageSource getInternalParentMessageSource() {
 		return (getParent() instanceof AbstractApplicationContext ?
 				((AbstractApplicationContext) getParent()).messageSource : getParent());

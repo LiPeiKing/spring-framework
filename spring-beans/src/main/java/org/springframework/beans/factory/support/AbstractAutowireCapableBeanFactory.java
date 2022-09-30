@@ -1241,6 +1241,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		if (resolved) {
 			if (autowireNecessary) {
+				// 有参构造
 				return autowireConstructor(beanName, mbd, null, null);
 			}
 			else {
