@@ -47,6 +47,9 @@ public interface ApplicationEventPublisher {
 	 * @see org.springframework.context.event.ContextRefreshedEvent
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
+	/**
+	 * 发布ApplicationEvent类型的事件
+	 */
 	default void publishEvent(ApplicationEvent event) {
 		publishEvent((Object) event);
 	}
@@ -65,6 +68,9 @@ public interface ApplicationEventPublisher {
 	 * @since 4.2
 	 * @see #publishEvent(ApplicationEvent)
 	 * @see PayloadApplicationEvent
+	 */
+	/**
+	 * 发布Object类型的事件
 	 */
 	void publishEvent(Object event);
 

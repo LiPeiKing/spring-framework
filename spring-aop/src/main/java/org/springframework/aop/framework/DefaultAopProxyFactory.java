@@ -52,6 +52,11 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	private static final long serialVersionUID = 7930414337282325166L;
 
 
+	/**
+	 * 判断代理类型
+	 * 如果能使用jdk动态代理，就返回 JdkDynamicAopProxy
+	 * 否则就返回 ObjenesisCglibAopProxy
+	 */
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (!NativeDetector.inNativeImage() &&

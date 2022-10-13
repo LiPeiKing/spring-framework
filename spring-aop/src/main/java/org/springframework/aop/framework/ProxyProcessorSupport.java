@@ -101,18 +101,27 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @param beanClass the class of the bean
 	 * @param proxyFactory the ProxyFactory for the bean
 	 */
+	/**
+	 * 判断是否能使用jdk动态代理
+	 */
 	protected void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+		// 获取类的所有接口
 		Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
 		boolean hasReasonableProxyInterface = false;
 		for (Class<?> ifc : targetInterfaces) {
-			if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) &&
-					ifc.getMethods().length > 0) {
+			// 1.isConfigurationCallbackInterface: 判断ifc是否为InitializingBean，DisposableBean，Closeable，AutoCloseable，以及包含 Aware
+			// 2.isInternalLanguageInterface: 是否为内部语言接口，如groovy，mock等
+			// 3.ifc.getMethods().length > 0：接口的方法数必须大于1
+			if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) && ifc.getMethods().length > 0) {
 				hasReasonableProxyInterface = true;
 				break;
 			}
 		}
 		if (hasReasonableProxyInterface) {
-			// Must allow for introductions; can't just set interfaces to the target's interfaces only.
+			// 需要将所有的接口都设置到proxyFactory
+			// 试想一下，如果一个类A 实现了接口 I1 与 I2，
+			// 如果类A的对象a  托管到了spring容器，那么无论是使用 beanFactory.get(I1.class)，
+			// 还是 beanFactory.get(I1.class)，都应该能获取到a.
 			for (Class<?> ifc : targetInterfaces) {
 				proxyFactory.addInterface(ifc);
 			}

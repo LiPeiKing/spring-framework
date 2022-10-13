@@ -1435,10 +1435,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// to support styles of field injection.
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
-				// 调用具体的后置处理器完成属性填充
-				// AutowiredAnnotationBeanPostProcessor.postProcessProperties 处理 @Autowired、@Value 注解
-				// CommonAnnotationBeanPostProcessor.postProcessProperties 处理 @Resource注解
-				// 如果返回 false，代表不需要进行后续的属性设值，也不需要再经过其他的 BeanPostProcessor 的处理
+
 				if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
 					return;
 				}
@@ -1475,7 +1472,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				// 调用后置处理器完成注释的属性填充
-				// 处理@Autowired注解的是 AutowiredAnnotationBeanPostProcessor
+				// 调用具体的后置处理器完成属性填充
+				// AutowiredAnnotationBeanPostProcessor.postProcessProperties 处理 @Autowired、@Value 注解
+				// CommonAnnotationBeanPostProcessor.postProcessProperties 处理 @Resource注解
+				// 如果返回 false，代表不需要进行后续的属性设值，也不需要再经过其他的 BeanPostProcessor 的处理
 				PropertyValues pvsToUse = bp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 				if (pvsToUse == null) {
 					if (filteredPds == null) {

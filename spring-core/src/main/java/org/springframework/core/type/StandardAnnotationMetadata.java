@@ -148,8 +148,10 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		Set<MethodMetadata> annotatedMethods = null;
 		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
 			try {
+				// 1. 通过反射类的获取所有的方法
 				Method[] methods = ReflectionUtils.getDeclaredMethods(getIntrospectedClass());
 				for (Method method : methods) {
+					// 2. 判断是否有 @Bean 注解
 					if (isAnnotatedMethod(method, annotationName)) {
 						if (annotatedMethods == null) {
 							annotatedMethods = new LinkedHashSet<>(4);

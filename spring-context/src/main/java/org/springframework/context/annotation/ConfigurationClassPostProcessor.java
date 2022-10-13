@@ -428,6 +428,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
 		StartupStep enhanceConfigClasses = this.applicationStartup.start("spring.context.config-classes.enhance");
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
+		// 遍历当前spring容器中所有的bd名称，这个for循环的目的就是找到所有全配置类（加了@Configuration注解的配置类
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
 			Object configClassAttr = beanDef.getAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_ATTRIBUTE);
@@ -479,7 +480,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return;
 		}
 
-		// 全配置类：处理代理
+		// 如果这个类是一个全配置类，那么就使用cglib进行代理增强，目的是防止@Bean方法的手动重复调用造成单例的破坏
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
@@ -488,14 +489,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// Set enhanced subclass of the user-specified bean class
 			// 处理 BeanClass
 			Class<?> configClass = beanDef.getBeanClass();
-			// 处理 BeanClass
+			// 给这个全配置类创建一个cglib增强后的Class对象
 			Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 			if (configClass != enhancedClass) {
 				if (logger.isTraceEnabled()) {
 					logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 							"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 				}
-				// 3. 设置 BeanClass，值为enhancedClass
+				// 3. 把cglib代理的Class对象设置到这个全配置类的bd中
 				beanDef.setBeanClass(enhancedClass);
 			}
 		}

@@ -44,6 +44,9 @@ public interface ApplicationEventMulticaster {
 	 * @see #removeApplicationListener(ApplicationListener)
 	 * @see #removeApplicationListeners(Predicate)
 	 */
+	/**
+	 * 添加监听器
+	 */
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
@@ -51,6 +54,9 @@ public interface ApplicationEventMulticaster {
 	 * @param listenerBeanName the name of the listener bean to add
 	 * @see #removeApplicationListenerBean(String)
 	 * @see #removeApplicationListenerBeans(Predicate)
+	 */
+	/**
+	 * 添加监听器的 beanName
 	 */
 	void addApplicationListenerBean(String listenerBeanName);
 
@@ -60,6 +66,9 @@ public interface ApplicationEventMulticaster {
 	 * @see #addApplicationListener(ApplicationListener)
 	 * @see #removeApplicationListeners(Predicate)
 	 */
+	/**
+	 * 移除监听器
+	 */
 	void removeApplicationListener(ApplicationListener<?> listener);
 
 	/**
@@ -67,6 +76,9 @@ public interface ApplicationEventMulticaster {
 	 * @param listenerBeanName the name of the listener bean to remove
 	 * @see #addApplicationListenerBean(String)
 	 * @see #removeApplicationListenerBeans(Predicate)
+	 */
+	/**
+	 * 移除监听器的 beanName
 	 */
 	void removeApplicationListenerBean(String listenerBeanName);
 
@@ -82,6 +94,9 @@ public interface ApplicationEventMulticaster {
 	 * @since 5.3.5
 	 * @see #addApplicationListener(ApplicationListener)
 	 * @see #removeApplicationListener(ApplicationListener)
+	 */
+	/**
+	 * 移除的监听器
 	 */
 	void removeApplicationListeners(Predicate<ApplicationListener<?>> predicate);
 
@@ -104,6 +119,9 @@ public interface ApplicationEventMulticaster {
 	 * on event notification until new listeners are registered.
 	 * @see #removeApplicationListeners(Predicate)
 	 */
+	/**
+	 * 移除所有的监听器
+	 */
 	void removeAllListeners();
 
 	/**
@@ -111,6 +129,9 @@ public interface ApplicationEventMulticaster {
 	 * <p>Consider using {@link #multicastEvent(ApplicationEvent, ResolvableType)}
 	 * if possible as it provides better support for generics-based events.
 	 * @param event the event to multicast
+	 */
+	/**
+	 * 广播事件
 	 */
 	void multicastEvent(ApplicationEvent event);
 
@@ -121,6 +142,9 @@ public interface ApplicationEventMulticaster {
 	 * @param event the event to multicast
 	 * @param eventType the type of event (can be {@code null})
 	 * @since 4.2
+	 */
+	/**
+	 * 广播事件
 	 */
 	void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType);
 

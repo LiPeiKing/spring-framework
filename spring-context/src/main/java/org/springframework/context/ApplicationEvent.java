@@ -45,6 +45,7 @@ public abstract class ApplicationEvent extends EventObject {
 	 * @see #ApplicationEvent(Object, Clock)
 	 */
 	public ApplicationEvent(Object source) {
+		// 事件内容
 		super(source);
 		this.timestamp = System.currentTimeMillis();
 	}

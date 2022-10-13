@@ -301,12 +301,11 @@ class ConfigurationClassParser {
 				// 3.2 componentScanParser.parse(...)：具体解析componentScan的操作
 				// componentScan就是@ComponentScan上的具体内容，
 				// sourceClass.getMetadata().getClassName()就是配置类的名称
-				// 真正解析的地方
+				// 真正解析的地方 解析@Component注解的类
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
 				// 3.3 循环得到的 BeanDefinition，如果对应的类是配置类，递归调用parse(...)方法
-				// componentScan引入的类可能有被@Bean标记的方法，或者有@ComponentScan注解
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
 					if (bdCand == null) {
@@ -314,7 +313,7 @@ class ConfigurationClassParser {
 					}
 					// 判断BeanDefinition对应的类是否为配置类
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
-						// 对得到的类，调用parse(...)方法，再次进行解析
+						// 对得到的类，调用parse(...)方法，再次进行解析，即递归处理
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}
@@ -418,6 +417,8 @@ class ConfigurationClassParser {
 	 */
 	private Set<MethodMetadata> retrieveBeanMethodMetadata(SourceClass sourceClass) {
 		AnnotationMetadata original = sourceClass.getMetadata();
+		// 获取包含 @Bean 注解的方法
+		// 最终调用的是 StandardAnnotationMetadata#getAnnotatedMethods
 		Set<MethodMetadata> beanMethods = original.getAnnotatedMethods(Bean.class.getName());
 		if (beanMethods.size() > 1 && original instanceof StandardAnnotationMetadata) {
 			// Try reading the class file via ASM for deterministic declaration order...
