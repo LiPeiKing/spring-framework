@@ -107,8 +107,7 @@ final class PostProcessorRegistrationDelegate {
 					// ConfigurationClassPostProcessor是很重要的一个类，它实现了
 					// BeanDefinitionRegistryPostProcessor接口，
 					// BeanDefinitionRegistryPostProcessor接口又实现了BeanFactoryPostProcessor接口
-					// ConfigurationClassPostProcessor是极其重要的类, 里面执行了
-					// 扫描 @Bean，@Import，@ImportResource 等各种操作
+					// ConfigurationClassPostProcessor是极其重要的类, 里面执行了扫描 @Bean，@Import，@ImportResource 等各种操作
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
